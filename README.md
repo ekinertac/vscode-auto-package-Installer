@@ -2,6 +2,8 @@
 
 This VS Code extension automatically detects missing packages in your JavaScript and TypeScript projects and offers to install them with a single click.
 
+![screenshot](https://raw.githubusercontent.com/ekinertac/vscode-quick-fix-install/master/images/screenshot.png)
+
 ## Features
 
 1. **Automatic Detection**: Detects missing packages in JavaScript and TypeScript files.
