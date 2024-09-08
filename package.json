@@ -3,6 +3,21 @@
   "displayName": "vscode-quick-fix-install",
   "description": "",
   "version": "0.0.1",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ekinertac/vscode-quick-fix-install.git"
+  },
+  "publisher": "ekinertac",
+  "author": {
+    "name": "Ekin Ertac",
+    "email": "ekinertac@gmail.com"
+  },
+  "icon": "images/icon.png",
+  "license": "MIT",
+  "homepage": "https://github.com/ekinertac/vscode-quick-fix-install",
+  "bugs": {
+    "url": "https://github.com/ekinertac/vscode-quick-fix-install/issues"
+  },
   "engines": {
     "vscode": "^1.90.0"
   },
@@ -72,7 +87,7 @@
     "test": "vscode-test"
   },
   "devDependencies": {
-    "@types/vscode": "^1.93.0",
+    "@types/vscode": "^1.90.0",
     "@types/mocha": "^10.0.7",
     "@types/node": "20.x",
     "@typescript-eslint/eslint-plugin": "^7.14.1",
