@@ -1,7 +1,7 @@
 {
   "name": "vscode-quick-fix-install",
-  "displayName": "vscode-quick-fix-install",
-  "description": "",
+  "displayName": "Auto Package Installer",
+  "description": "Install missing packages without leaving your code",
   "version": "1.0.0",
   "repository": {
     "type": "git",
@@ -22,7 +22,27 @@
     "vscode": "^1.90.0"
   },
   "categories": [
-    "Other"
+    "Programming Languages",
+    "Linters",
+    "Formatters"
+  ],
+  "galleryBanner": {
+    "color": "#FFB732",
+    "theme": "dark"
+  },
+  "keywords": [
+    "vscode",
+    "extension",
+    "package",
+    "installer",
+    "quick fix",
+    "javascript",
+    "typescript",
+    "npm",
+    "yarn",
+    "pnpm",
+    "bun",
+    "expo"
   ],
   "main": "./dist/extension.js",
   "contributes": {

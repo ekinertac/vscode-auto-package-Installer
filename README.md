@@ -58,7 +58,9 @@ This extension does not add any VS Code settings.
 
 ## Known Issues
 
-[List any known issues here, or remove this section if there are none]
+- The extension may not work in all TypeScript projects.
+- Be careful with monorepo setups. The extension may not work if you have multiple package.json files in different directories.
+- The extension may not work if the package.json file is not found.
 
 ## Release Notes
 
