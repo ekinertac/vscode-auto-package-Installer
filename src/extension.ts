@@ -1,63 +1,14 @@
 import * as vscode from 'vscode';
-import { exec } from 'child_process';
-import { promisify } from 'util';
 import * as path from 'path';
-import * as fs from 'fs';
-
-const execAsync = promisify(exec);
-const fsExists = promisify(fs.exists);
-
-const foldersToSkip = ['node_modules', 'venv', '.venv', 'env', '.env'];
-
-async function findNearestPackageJson(startPath: string): Promise<string | null> {
-  let currentDir = startPath;
-  while (currentDir !== path.parse(currentDir).root) {
-    if (foldersToSkip.some((folder) => currentDir.includes(path.sep + folder + path.sep))) {
-      currentDir = path.dirname(currentDir);
-      continue;
-    }
-
-    const packageJsonPath = path.join(currentDir, 'package.json');
-    if (await fsExists(packageJsonPath)) {
-      return packageJsonPath;
-    }
-    currentDir = path.dirname(currentDir);
-  }
-  return null;
-}
+import { findNearestPackageJson } from './fileUtils';
+import { installPackage, isExpoProject, detectPackageManager } from './packageManagers';
+import { createCodeActionProvider } from './codeActionProvider';
 
 export function activate(context: vscode.ExtensionContext) {
   const supportedLanguages = ['javascript', 'typescript'];
 
   supportedLanguages.forEach((language) => {
-    const codeActionProvider = {
-      provideCodeActions(
-        document: vscode.TextDocument,
-        range: vscode.Range,
-        context: vscode.CodeActionContext,
-      ): vscode.CodeAction[] | undefined {
-        const diagnostic = context.diagnostics.find(
-          (d) => d.message.includes('Cannot find module') || d.message.includes('cannot be found'),
-        );
-
-        if (diagnostic) {
-          const fix = new vscode.CodeAction('Install missing package', vscode.CodeActionKind.QuickFix);
-
-          fix.command = {
-            command: 'extension.installPackage',
-            title: 'Install missing package',
-            arguments: [document, diagnostic],
-          };
-
-          fix.diagnostics = [diagnostic];
-
-          return [fix];
-        }
-
-        return undefined;
-      },
-    };
-
+    const codeActionProvider = createCodeActionProvider();
     const codeActionProviderDisposable = vscode.languages.registerCodeActionsProvider(
       { language, scheme: 'file' },
       codeActionProvider,
@@ -91,6 +42,8 @@ export function activate(context: vscode.ExtensionContext) {
           return;
         }
 
+        const projectPath = path.dirname(packageJsonPath);
+
         vscode.window.withProgress(
           {
             location: vscode.ProgressLocation.Notification,
@@ -100,9 +53,13 @@ export function activate(context: vscode.ExtensionContext) {
           async (progress) => {
             try {
               progress.report({ increment: 0 });
-              await execAsync(`npm install ${packageName}`, { cwd: path.dirname(packageJsonPath) });
+              await installPackage(packageName, projectPath);
               progress.report({ increment: 100 });
-              vscode.window.showInformationMessage(`Package installed successfully: ${packageName}`);
+              const isExpo = await isExpoProject(projectPath);
+              const installMethod = isExpo ? 'npx expo install' : await detectPackageManager(projectPath);
+              vscode.window.showInformationMessage(
+                `Package installed successfully: ${packageName} (using ${installMethod})`,
+              );
             } catch (error) {
               const errorMessage = error instanceof Error ? error.message : String(error);
               vscode.window.showErrorMessage(`Failed to install package: ${packageName}. Error: ${errorMessage}`);
