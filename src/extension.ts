@@ -8,10 +8,18 @@ export function activate(context: vscode.ExtensionContext) {
   const supportedLanguages = ['javascript', 'typescript'];
 
   supportedLanguages.forEach((language) => {
-    const codeActionProvider = createCodeActionProvider();
     const codeActionProviderDisposable = vscode.languages.registerCodeActionsProvider(
       { language, scheme: 'file' },
-      codeActionProvider,
+      {
+        async provideCodeActions(document, range, context) {
+          const packageJsonPath = await findNearestPackageJson(path.dirname(document.uri.fsPath));
+          if (packageJsonPath) {
+            const projectPath = path.dirname(packageJsonPath);
+            return createCodeActionProvider(projectPath).provideCodeActions(document, range, context);
+          }
+          return undefined;
+        },
+      },
       {
         providedCodeActionKinds: [vscode.CodeActionKind.QuickFix],
       },
