@@ -13,8 +13,21 @@ export async function detectPackageManager(projectPath: string): Promise<string>
     { name: 'bun', file: 'bun.lockb' },
   ];
 
+  let currentPath = projectPath;
+  const root = path.parse(currentPath).root;
+
+  while (currentPath !== root) {
+    for (const pm of packageManagers) {
+      if (await fsExists(path.join(currentPath, pm.file))) {
+        return pm.name;
+      }
+    }
+    currentPath = path.dirname(currentPath);
+  }
+
+  // Check the root directory as well
   for (const pm of packageManagers) {
-    if (await fsExists(path.join(projectPath, pm.file))) {
+    if (await fsExists(path.join(root, pm.file))) {
       return pm.name;
     }
   }
