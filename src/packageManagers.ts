@@ -35,6 +35,16 @@ export async function detectPackageManager(projectPath: string): Promise<string>
   return 'npm'; // Default to npm if no lock file is found
 }
 
+export async function isExpoProject(projectPath: string): Promise<boolean> {
+  const packageJsonPath = path.join(projectPath, 'package.json');
+  try {
+    const packageJson = JSON.parse(await fs.promises.readFile(packageJsonPath, 'utf8'));
+    return packageJson.dependencies?.['expo'] || packageJson.devDependencies?.['expo'];
+  } catch (error) {
+    return false;
+  }
+}
+
 export async function installPackage(packageName: string, projectPath: string): Promise<void> {
   const isExpo = await isExpoProject(projectPath);
   if (isExpo) {
