@@ -13,23 +13,26 @@ export async function detectPackageManager(projectPath: string): Promise<string>
     { name: 'bun', file: 'bun.lockb' },
   ];
 
+  let currentPath = projectPath;
+  const root = path.parse(currentPath).root;
+
+  while (currentPath !== root) {
+    for (const pm of packageManagers) {
+      if (await fsExists(path.join(currentPath, pm.file))) {
+        return pm.name;
+      }
+    }
+    currentPath = path.dirname(currentPath);
+  }
+
+  // Check the root directory as well
   for (const pm of packageManagers) {
-    if (await fsExists(path.join(projectPath, pm.file))) {
+    if (await fsExists(path.join(root, pm.file))) {
       return pm.name;
     }
   }
 
   return 'npm'; // Default to npm if no lock file is found
-}
-
-export async function isExpoProject(projectPath: string): Promise<boolean> {
-  const packageJsonPath = path.join(projectPath, 'package.json');
-  try {
-    const packageJson = JSON.parse(await fs.promises.readFile(packageJsonPath, 'utf8'));
-    return packageJson.dependencies?.['expo'] || packageJson.devDependencies?.['expo'];
-  } catch (error) {
-    return false;
-  }
 }
 
 export async function installPackage(packageName: string, projectPath: string): Promise<void> {
